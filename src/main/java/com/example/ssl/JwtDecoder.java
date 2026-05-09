@@ -49,4 +49,13 @@ public class JwtDecoder {
             throw new RuntimeException("Failed to decode token", e);
         }
     }
+
+    public boolean isValid(String token) {
+        try {
+            decodeToken(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

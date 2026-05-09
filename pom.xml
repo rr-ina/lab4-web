@@ -6,7 +6,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.5.13</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/> 
 	</parent>
 	<groupId>com.example</groupId>
 	<artifactId>ssl</artifactId>
@@ -75,17 +75,35 @@
             <artifactId>nimbus-jose-jwt</artifactId>
             <version>9.37.3</version>
         </dependency>
+
+        <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+        <dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+			<version>4.29.3</version>
+		</dependency>
+
+        <dependency>
+			<groupId>io.github.binance</groupId>
+			<artifactId>binance-connector-java</artifactId>
+			<version>3.2.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-maven-plugin</artifactId>
-    <configuration>
-        <jvmArguments>-Djdk.tls.disabledAlgorithms="SSLv3 TLSv1 TLSv1.1 RC4 DES MD5withRSA anon NULL"</jvmArguments>
-    </configuration>
-</plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                <jvmArguments>-Djdk.tls.disabledAlgorithms="SSLv3 TLSv1 TLSv1.1 RC4 DES MD5withRSA anon NULL"</jvmArguments>
+                </configuration>
+            </plugin>
 		</plugins>
 	</build>
 

@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Web Lab 3 Ryndych Dariia</title>
+  <title>Web Lab 4 Ryndych Dariia</title>
 </head>
 <body>
-  <h1>Web Lab 3 Ryndych Dariia</h1>
+  <h1>Web Lab 4 Ryndych Dariia</h1>
 
   <p>Status: <span id="status">Not logged in</span></p>
 
@@ -14,7 +14,13 @@
 
   <p id="result">Place for user information</p>
 
+  <h2>Cryptocurrency Updates</h2>
+  <button onclick="subscribeToUpdates()">Subscribe to Updates</button>
+  <div id="prices"></div>
+
   <script>
+    let socket = null;
+    
     window.onload = async function() {
       await checkStatus();
     }
@@ -44,7 +50,73 @@
         document.getElementById("result").textContent = JSON.stringify(data, null, 2);
       }
     }
-  </script>
+
+    async function subscribeToUpdates() {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        alert("Вже підключено!");
+        return;
+      }
+
+      const res = await fetch("/token", { credentials: "include" });
+      if (res.status !== 200) {
+        alert("Спочатку увійдіть в систему!");
+        return;
+      }
+      const data = await res.json();
+      const token = data.token;
+
+      socket = new WebSocket("wss://localhost:8443/ws/prices?token=" + token);
+      socket.binaryType = "arraybuffer";
+
+      socket.onopen = function() {
+        document.getElementById("status").textContent = "Connected to WebSocket";
+      };
+
+      socket.onmessage = function(event) {
+        const bytes = new Uint8Array(event.data);
+        const { symbol, price } = decodeProtobuf(bytes);
+        updatePrice(symbol, price);
+      };
+
+      socket.onclose = function() {
+        document.getElementById("status").textContent = "WebSocket disconnected";
+      };
+    }
+    
+    function decodeProtobuf(bytes) {
+      let symbol = "";
+      let price = "";
+      let i = 0;
+      while (i < bytes.length) {
+        const tag = bytes[i++];
+        const fieldNumber = tag >> 3;
+        let length = 0;
+        let shift = 0;
+        while (true) {
+          const b = bytes[i++];
+          length |= (b & 0x7F) << shift;
+          if ((b & 0x80) === 0) break;
+          shift += 7;
+        }
+        const value = new TextDecoder().decode(bytes.slice(i, i + length));
+        i += length;
+        if (fieldNumber === 1) symbol = value;
+        else if (fieldNumber === 2) price = value;
+      }
+      return { symbol, price };
+    }
+
+    function updatePrice(symbol, price, time) {
+      const pricesDiv = document.getElementById("prices");
+      let row = document.getElementById("price-" + symbol);
+      if (!row) {
+        row = document.createElement("p");
+        row.id = "price-" + symbol;
+        pricesDiv.appendChild(row);
+      }
+      const rounded = parseFloat(price).toFixed(2);
+      row.textContent = symbol + ": $" + rounded;
+    }
   </script>
 </body>
 </html>
